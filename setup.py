@@ -1,3 +1,4 @@
 from setuptools import setup
 
-setup(entry_points={'console_scripts': ['cstash = app:main']})
+setup(install_requires=['pyyaml'],
+      entry_points={'console_scripts': ['cstash = app:main']})
