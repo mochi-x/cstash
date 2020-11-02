@@ -4,18 +4,8 @@ import argparse
 
 
 def main():
-    p = argparse.ArgumentParser()
-    p.add_argument('cmd', help='ls, rm, add')
-    # p.add_argument('-a', '--opt_a', help='option')
-    args = p.parse_args()
-
-    envPath = os.environ['HOME'] + '/.cstash'
-    envExist = os.path.exists(envPath)
-
-    if not envExist:
-        f = open(envPath, 'w')
-        f.write('')
-        f.close()
+    createHistory()
+    args = createArgSetting()
 
     if args.cmd == 'add':
         print('add exec')
@@ -23,3 +13,20 @@ def main():
         print('ls exec')
     if args.cmd == 'rm':
         print('rm exec')
+
+
+def createArgSetting():
+    p = argparse.ArgumentParser()
+    p.add_argument('cmd', help='ls, rm, add')
+    # p.add_argument('-a', '--opt_a', help='option')
+    return p.parse_args()
+
+
+def createHistory():
+    stashPath = os.environ['HOME'] + '/.cstash'
+    stashExist = os.path.exists(stashPath)
+
+    if not stashExist:
+        f = open(stashPath, 'w')
+        f.write('')
+        f.close()
