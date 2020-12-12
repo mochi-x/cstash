@@ -2,19 +2,30 @@ import os
 import sys
 import argparse
 import json
+import subprocess
 from prettytable import PrettyTable
 
 
 def main():
-    args = createArgSetting()
-    createHistory()
+    parser = createParseSetting()
+    args = parser.parse_args()
 
-    if args.cmd == 'add':
-        print('add exec')
-    if args.cmd == 'ls':
+    createHistory()
+    if args.COMMAND == 'add':
+        addStash(parser, args.command)
+    elif args.COMMAND == 'ls':
         getStashList()
-    if args.cmd == 'rm':
-        print('rm exec')
+    elif args.COMMAND == 'rm':
+        deleteStash(parser, args.index)
+    elif args.COMMAND == 'exec':
+        execStash(parser, args.index)
+    else:
+        if parser.print_help() != None:
+            showHelp(parser)
+
+
+def showHelp(parser):
+    print(parser.print_help())
 
 
 def createHistory():
@@ -29,23 +40,64 @@ def createHistory():
         f.close()
 
 
-def createArgSetting():
-    cmdList = ['add', 'ls', 'rm']
-
+def createParseSetting():
     p = argparse.ArgumentParser()
-    p.add_argument('cmd', help='ls, rm, add', choices=cmdList)
-    # p.add_argument('-a', '--opt_a', help='option')
-    return p.parse_args()
+    p.add_argument('COMMAND', help='')
+    p.add_argument('-c', '--command', help='')
+    p.add_argument('-i', '--index', help='')
+    return p
 
 
 def getStashList():
     stashJsonPath = os.environ['HOME'] + '/.cstash/stash.json'
     with open(stashJsonPath) as f:
         loadStash = json.load(f)
-
         x = PrettyTable()
         x.field_names = ['INDEX', 'COMMAND']
         for i in range(len(loadStash)):
             x.add_row([i, loadStash[i]])
 
         print(x.get_string())
+
+
+def addStash(parser, cmd):
+    if cmd == None:
+        showHelp(parser)
+        sys.exit()
+
+    stashJsonPath = os.environ['HOME'] + '/.cstash/stash.json'
+    with open(stashJsonPath) as f:
+        loadStash = json.load(f)
+        loadStash.append(cmd)
+        addStash = json.dumps(loadStash)
+
+        f = open(stashJsonPath, 'w')
+        f.write(addStash)
+        f.close()
+
+
+def deleteStash(parser, index):
+    stashJsonPath = os.environ['HOME'] + '/.cstash/stash.json'
+    with open(stashJsonPath) as f:
+        loadStash = json.load(f)
+        if index == None or int(index) > len(loadStash) - 1 or int(index) < 0:
+            showHelp(parser)
+            sys.exit()
+
+        del loadStash[int(index)]
+        deleteStash = json.dumps(loadStash)
+
+        f = open(stashJsonPath, 'w')
+        f.write(deleteStash)
+        f.close()
+
+
+def execStash(parser, index):
+    stashJsonPath = os.environ['HOME'] + '/.cstash/stash.json'
+    with open(stashJsonPath) as f:
+        loadStash = json.load(f)
+        if index == None or int(index) > len(loadStash) - 1 or int(index) < 0:
+            showHelp(parser)
+            sys.exit()
+        print(loadStash[int(index)])
+        subprocess.call(loadStash[int(index)].split())
