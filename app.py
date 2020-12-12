@@ -99,5 +99,4 @@ def execStash(parser, index):
         if index == None or int(index) > len(loadStash) - 1 or int(index) < 0:
             showHelp(parser)
             sys.exit()
-        print(loadStash[int(index)])
         subprocess.call(loadStash[int(index)].split())
